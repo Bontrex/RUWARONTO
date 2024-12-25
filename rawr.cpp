@@ -7,7 +7,7 @@
 #include <windows.h>
 
 using namespace std;
-
+// what do i do again ben? i forgor
 void build(int building1x[],int x,int y,int building1y[]){
 }
 
