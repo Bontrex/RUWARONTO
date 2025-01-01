@@ -454,6 +454,7 @@ int main()
                 }
             }
             // yg di bawah ini adalah kode buat gambar map nya
+            score++;
             cout<<"Score: "<<score<<endl;
             for (int i = 0; i < 10; i++) { //untuk bagian ini agak bingungin, tapi tak jelasin ae
                 for (int j = 0; j < 50; j++) { // jadi 2 for loop ini itu buat nge scan semua map nya
@@ -535,6 +536,7 @@ int main()
                         }
 
                         y--; //buat player lompat
+                        score++;
                         cout<<"Score: "<<score<<endl;
                         for (int i = 0; i < 10; i++) {
                             for (int j = 0; j < 50; j++) {
@@ -601,11 +603,6 @@ int main()
                             }
                             cout<<endl;
                         }
-                        for(int i=0;i<MAX_BUILDINGS;i++){
-                            if (active[i] && buildingX[i] == x && y != buildingY[i]) {
-                                score += 100;
-                            }
-                        }
                         cout<<"Press w to jump 2 blocks"<<endl<<"Press shift+w to jump 3 blocks";
                         Sleep(100);
                     }
@@ -623,6 +620,7 @@ int main()
                         }
 
                         y++;
+                        score++;
                         cout<<"Score: "<<score<<endl;
                         for (int i = 0; i < 10; i++) {
                             for (int j = 0; j < 50; j++) {
@@ -701,6 +699,7 @@ int main()
                         }
 
                         y--; //buat player lompat
+                        score++;
                         cout<<"Score: "<<score<<endl;
                         for (int i = 0; i < 10; i++) {
                             for (int j = 0; j < 50; j++) {
@@ -767,11 +766,6 @@ int main()
                             }
                             cout<<endl;
                         }
-                        for(int i=0;i<MAX_BUILDINGS;i++){
-                            if (active[i] && buildingX[i] == x && y != buildingY[i]) {
-                                score += 100;
-                            }
-                        }
                         cout<<"Press w to jump 2 blocks"<<endl<<"Press shift+w to jump 3 blocks";
                         Sleep(100);
                     }
@@ -789,6 +783,7 @@ int main()
                         }
 
                         y++;
+                        score++;
                         cout<<"Score: "<<score<<endl;
                         for (int i = 0; i < 10; i++) {
                             for (int j = 0; j < 50; j++) {
