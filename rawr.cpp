@@ -24,7 +24,7 @@ int main()
     vector <string> hsscore;
     vector <int> intscore;
     string name, tempscore,tempname,lines;
-    int x = 5, y = 6,score=0,menu1,tempscore2,menu2;
+    int x = 5, y = 6,score=0,menu1,tempscore2,menu2,mul=0;
     char key;
     string maps[10][50] = { // map (no shit)
         {"#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#"},
@@ -50,6 +50,7 @@ int main()
         }
         system("cls");
         score=0;
+        mul=0;
         hsname.clear();
         hsscore.clear();
         intscore.clear();
@@ -455,6 +456,9 @@ int main()
             }
             // yg di bawah ini adalah kode buat gambar map nya
             score++;
+            if(mul<10){
+                mul=score/50;
+            }
             cout<<"Score: "<<score<<endl;
             for (int i = 0; i < 10; i++) { //untuk bagian ini agak bingungin, tapi tak jelasin ae
                 for (int j = 0; j < 50; j++) { // jadi 2 for loop ini itu buat nge scan semua map nya
@@ -524,7 +528,7 @@ int main()
                 cout << endl;
             }
             cout<<"Press w to jump 2 blocks"<<endl<<"Press shift+w to jump 3 blocks";
-            Sleep(100);
+            Sleep(100-5*mul);
 
             if (kbhit()) {
                 key = getch();
@@ -537,6 +541,9 @@ int main()
 
                         y--; //buat player lompat
                         score++;
+                        if(mul<10){
+                            mul=score/50;
+                        }
                         cout<<"Score: "<<score<<endl;
                         for (int i = 0; i < 10; i++) {
                             for (int j = 0; j < 50; j++) {
@@ -604,7 +611,7 @@ int main()
                             cout<<endl;
                         }
                         cout<<"Press w to jump 2 blocks"<<endl<<"Press shift+w to jump 3 blocks";
-                        Sleep(100);
+                        Sleep(100-5*mul);
                     }
                     // <IMPORTANT><IMPORTANT><IMPORTANT><IMPORTANT><IMPORTANT><IMPORTANT><IMPORTANT><IMPORTANT>
                     // klo km blm notice kita ada 3 kyk ginian di code nya, yang pertama funsinya untuk render map sebelum input
@@ -621,6 +628,9 @@ int main()
 
                         y++;
                         score++;
+                        if(mul<10){
+                            mul=score/50;
+                        }
                         cout<<"Score: "<<score<<endl;
                         for (int i = 0; i < 10; i++) {
                             for (int j = 0; j < 50; j++) {
@@ -688,7 +698,7 @@ int main()
                             cout<<endl;
                         }
                         cout<<"Press w to jump 2 blocks"<<endl<<"Press shift+w to jump 3 blocks";
-                        Sleep(100);
+                        Sleep(100-5*mul);
                     }
                 }
                 if (key == 'W') { // renderin for making the player go up
@@ -700,6 +710,9 @@ int main()
 
                         y--; //buat player lompat
                         score++;
+                        if(mul<10){
+                            mul=score/50;
+                        }
                         cout<<"Score: "<<score<<endl;
                         for (int i = 0; i < 10; i++) {
                             for (int j = 0; j < 50; j++) {
@@ -767,7 +780,7 @@ int main()
                             cout<<endl;
                         }
                         cout<<"Press w to jump 2 blocks"<<endl<<"Press shift+w to jump 3 blocks";
-                        Sleep(100);
+                        Sleep(100-5*mul);
                     }
                     // <IMPORTANT><IMPORTANT><IMPORTANT><IMPORTANT><IMPORTANT><IMPORTANT><IMPORTANT><IMPORTANT>
                     // klo km blm notice kita ada 3 kyk ginian di code nya, yang pertama funsinya untuk render map sebelum input
@@ -784,6 +797,9 @@ int main()
 
                         y++;
                         score++;
+                        if(mul<10){
+                            mul=score/50;
+                        }
                         cout<<"Score: "<<score<<endl;
                         for (int i = 0; i < 10; i++) {
                             for (int j = 0; j < 50; j++) {
@@ -851,7 +867,7 @@ int main()
                             cout<<endl;
                         }
                         cout<<"Press w to jump 2 blocks"<<endl<<"Press shift+w to jump 3 blocks";
-                        Sleep(100);
+                        Sleep(100-5*mul);
                     }
                 }
             }
