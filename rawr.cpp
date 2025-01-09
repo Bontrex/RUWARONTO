@@ -114,6 +114,194 @@ void checkcol(int seedb[3],bool active[3],int x,int y,int buildingX[3], int buil
     }
 }
 
+void clearall(vector <string> &hsname,vector <string> &hsscore,vector <int> &intscore){
+    hsname.clear();
+    hsscore.clear();
+    intscore.clear();
+}
+
+void menu(int &menu1){
+    cout<<">>";
+    cin>>menu1;
+}
+
+void twnot(int twerk){
+    if(twerk==0){
+        cout<<"Press w to jump 2 blocks"<<endl<<"Press shift+w to jump 3 blocks"<<endl<<"Press s to toggle crouch";
+    }
+    else if(twerk==1){
+        cout<<"Press s to untoggle crouch";
+    }
+}
+
+void gameover(vector <string> &hsname,vector <string> &hsscore,vector <int> &intscore,int score){
+    string name,tempscore,tempname;
+    int tempscore2;
+    fstream inf,outf;
+    cout << "Game Over!" << endl<<"Enter your name: ";
+    cin>>name;
+    hsname.push_back(name);
+    intscore.push_back(score);
+    stringstream ss;
+    ss<<score;
+    tempname=ss.str();
+    hsscore.push_back(tempname);
+    for(int i=0;i<intscore.size();i++){
+        for(int j=0;j<intscore.size();j++){
+            if(intscore[i]>intscore[j]){
+                tempscore2=intscore[i];
+                tempscore=hsscore[i];
+                tempname=hsname[i];
+                intscore[i]=intscore[j];
+                hsscore[i]=hsscore[j];
+                hsname[i]=hsname[j];
+                intscore[j]=tempscore2;
+                hsscore[j]=tempscore;
+                hsname[j]=tempname;
+            }
+        }
+    }
+    if(intscore.size()>5){
+        intscore.erase(intscore.begin()+5);
+        hsscore.erase(hsscore.begin()+5);
+        hsname.erase(hsname.begin()+5);
+    }
+    outf.open("hsname.txt",ios::out);
+    for(int i=0;i<hsname.size();i++){
+        outf<<hsname[i]<<endl;
+    }
+    outf.close();
+    outf.open("hsscore.txt",ios::out);
+    for(int i=0;i<intscore.size();i++){
+        outf<<intscore[i]<<endl;
+    }
+    outf.close();
+}
+
+void building(int seedb[3],int buildingY[3],int buildingX[3],bool active[3],int y,int x,int twerk,string maps[10][50]){
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 50; j++) {
+            bool isBuilding = false;
+            for (int b = 0; b < 3; b++) {
+                if(seedb[b]==0){
+                    if (active[b] && i == buildingY[b] && j == buildingX[b]) {
+                        cout << "T "; // kalau ada building maka akan di gambar sebuah building
+                        isBuilding = true; // isbuilding di set true
+                        break; // stop loop nya karena kita sudah nemu building nya
+                    }
+                }
+                else if(seedb[b]==1){
+                    if (active[b] && (i == buildingY[b] || i == buildingY[b]-1) && j==buildingX[b] ) {
+                        cout << "T "; // kalau ada building maka akan di gambar sebuah building
+                        isBuilding = true; // isbuilding di set true
+                        break; // stop loop nya karena kita sudah nemu building nya
+                    }
+                    if(active[b] && (j == buildingX[b] || j==buildingX[b]+1) && i == buildingY[b]){
+                        cout << "T "; // kalau ada building maka akan di gambar sebuah building
+                        isBuilding = true; // isbuilding di set true
+                        break; // stop loop nya karena kita sudah nemu building nya
+                    }
+                }
+                else if(seedb[b]==2){
+                    if (active[b] && (i == buildingY[b] || i == buildingY[b]-1) && j==buildingX[b] ) {
+                        cout << "T "; // kalau ada building maka akan di gambar sebuah building
+                        isBuilding = true; // isbuilding di set true
+                        break; // stop loop nya karena kita sudah nemu building nya
+                    }
+                    if(active[b] && (j == buildingX[b] || j==buildingX[b]-1) && i == buildingY[b]){
+                        cout << "T "; // kalau ada building maka akan di gambar sebuah building
+                        isBuilding = true; // isbuilding di set true
+                        break; // stop loop nya karena kita sudah nemu building nya
+                    }
+                }
+                else if(seedb[b]==3){
+                    if (active[b] && (i == buildingY[b] || i == buildingY[b]-1) && (j == buildingX[b] || j==buildingX[b]-1) ) {
+                        cout << "T "; // kalau ada building maka akan di gambar sebuah building
+                        isBuilding = true; // isbuilding di set true
+                        break; // stop loop nya karena kita sudah nemu building nya
+                    }
+                }
+                else if(seedb[b]==4){
+                    if(active[b]&&(i == buildingY[b] || i == buildingY[b]-1) && j==buildingX[b]){
+                        cout << "T "; // kalau ada building maka akan di gambar sebuah building
+                        isBuilding = true; // isbuilding di set true
+                        break; // stop loop nya karena kita sudah nemu building nya
+                    }
+                    if(active[b] && (j == buildingX[b] || j==buildingX[b]+1 || j==buildingX[b]-1) && i == buildingY[b]){
+                        cout << "T "; // kalau ada building maka akan di gambar sebuah building
+                        isBuilding = true; // isbuilding di set true
+                        break; // stop loop nya karena kita sudah nemu building nya
+                    }
+                }
+                else if(seedb[b]==5){
+                    if(active[b]&& i==buildingY[b]-1 && j==buildingX[b]){
+                        cout<<"W ";
+                        isBuilding=true;
+                        break;
+                    }
+                }
+                else if(seedb[b]==6){
+                    if(active[b]&& i==buildingY[b]-2 && j==buildingX[b]){
+                        cout<<"W ";
+                        isBuilding=true;
+                        break;
+                    }
+                }
+            }
+            if (isBuilding) continue;
+
+            if (i == y && j == x && twerk==1) {
+                cout<<"d ";
+            }
+            else if((i==y-1|| i==y)&& j==x && twerk==0){
+                cout<<"D ";
+            }
+            else {
+                cout << maps[i][j] << " ";
+            }
+        }
+        cout<<endl;
+    }
+}
+
+void crouch(char key,int &twerk){
+    if(key=='s' && twerk==0){
+        twerk=1;
+    }
+    else if(key=='s' && twerk==1){
+        twerk=0;
+    }
+}
+
+void read(vector <string> &hsname,vector <string> &hsscore){
+    fstream inf,outf;
+    string lines;
+    inf.open("hsname.txt",ios::in);
+    while(getline(inf,lines)){
+        hsname.push_back(lines);
+    }
+    inf.close();
+    inf.open("hsscore.txt",ios::in);
+    while(getline(inf,lines)){
+        hsscore.push_back(lines);
+    }
+    inf.close();
+}
+
+void scoring(int &score, int &mul){
+    score+=10;
+    if(mul<10){
+        mul=score/250;
+    }
+    cout<<"Score: "<<score<<endl;
+}
+
+void beware(bool active[3],int buildingX[3]){
+    for (int i = 0; i < 3; i++) {
+        if (active[i]) buildingX[i]--;
+    }
+}
+
 int main()
 {
     srand(time(0));
@@ -141,9 +329,7 @@ int main()
         {"#"," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," ","#"},
         {"#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#"},
     };
-        hsname.clear();
-        hsscore.clear();
-        intscore.clear();
+        clearall(hsname,hsscore,intscore);
     while(true){
         for(int i=0;i<3;i++){
             buildingX[i] = -1; // biar building nya spawn di luar screen
@@ -154,19 +340,8 @@ int main()
         system("cls");
         score=0;
         mul=0;
-        hsname.clear();
-        hsscore.clear();
-        intscore.clear();
-        inf.open("hsname.txt",ios::in);
-        while(getline(inf,lines)){
-            hsname.push_back(lines);
-        }
-        inf.close();
-        inf.open("hsscore.txt",ios::in);
-        while(getline(inf,lines)){
-            hsscore.push_back(lines);
-        }
-        inf.close();
+        clearall(hsname,hsscore,intscore);
+        read(hsname, hsscore);
         for(int i=0;i<hsscore.size();i++){
             tempscore=hsscore[i];
             stringstream(tempscore)>>tempscore2;
@@ -174,8 +349,7 @@ int main()
         }
         cout<<"Welcome to Ruwarono"<<endl<<"1. Play"<<endl<<"2. Highscores"<<endl<<"0. Embrace Cowardice?"<<endl;
         do{
-            cout<<">>";
-            cin>>menu1;
+            menu(menu1);
         }while(menu1>2||menu1<0);
         int spawnTimer = 0;
         while (menu1==1) {
@@ -188,44 +362,7 @@ int main()
             }
             checkcol(seedb,active,x,y,buildingX,buildingY,menu1,twerk);
             if(menu1==5){
-                cout << "Game Over!" << endl<<"Enter your name: ";
-                cin>>name;
-                hsname.push_back(name);
-                intscore.push_back(score);
-                stringstream ss;
-                ss<<score;
-                tempname=ss.str();
-                hsscore.push_back(tempname);
-                for(int i=0;i<intscore.size();i++){
-                    for(int j=0;j<intscore.size();j++){
-                        if(intscore[i]>intscore[j]){
-                            tempscore2=intscore[i];
-                            tempscore=hsscore[i];
-                            tempname=hsname[i];
-                            intscore[i]=intscore[j];
-                            hsscore[i]=hsscore[j];
-                            hsname[i]=hsname[j];
-                            intscore[j]=tempscore2;
-                            hsscore[j]=tempscore;
-                            hsname[j]=tempname;
-                        }
-                    }
-                }
-                if(intscore.size()>5){
-                    intscore.erase(intscore.begin()+5);
-                    hsscore.erase(hsscore.begin()+5);
-                    hsname.erase(hsname.begin()+5);
-                }
-                outf.open("hsname.txt",ios::out);
-                for(int i=0;i<hsname.size();i++){
-                    outf<<hsname[i]<<endl;
-                }
-                outf.close();
-                outf.open("hsscore.txt",ios::out);
-                for(int i=0;i<intscore.size();i++){
-                    outf<<intscore[i]<<endl;
-                }
-                outf.close();
+                gameover(hsname,hsscore,intscore,score);
                 menu1=7;
                 break;
             }
@@ -253,102 +390,9 @@ int main()
                 }
             }
             // yg di bawah ini adalah kode buat gambar map nya
-            score+=10;
-            if(mul<10){
-                mul=score/250;
-            }
-            cout<<"Score: "<<score<<endl;
-            for (int i = 0; i < 10; i++) { //untuk bagian ini agak bingungin, tapi tak jelasin ae
-                for (int j = 0; j < 50; j++) { // jadi 2 for loop ini itu buat nge scan semua map nya
-                    bool isBuilding = false; // kali di tile (i,j) tidak ada building, maka isbuilding=false
-                    for (int b = 0; b < MAX_BUILDINGS; b++) {
-                        if(seedb[b]==0){
-                            if (active[b] && i == buildingY[b] && j == buildingX[b]) {
-                                cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                isBuilding = true; // isbuilding di set true
-                                break; // stop loop nya karena kita sudah nemu building nya
-                            }
-                        }
-                        else if(seedb[b]==1){
-                            if (active[b] && (i == buildingY[b] || i == buildingY[b]-1) && j==buildingX[b] ) {
-                                cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                isBuilding = true; // isbuilding di set true
-                                break; // stop loop nya karena kita sudah nemu building nya
-                            }
-                            if(active[b] && (j == buildingX[b] || j==buildingX[b]+1) && i == buildingY[b]){
-                                cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                isBuilding = true; // isbuilding di set true
-                                break; // stop loop nya karena kita sudah nemu building nya
-                            }
-                        }
-                        else if(seedb[b]==2){
-                            if (active[b] && (i == buildingY[b] || i == buildingY[b]-1) && j==buildingX[b] ) {
-                                cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                isBuilding = true; // isbuilding di set true
-                                break; // stop loop nya karena kita sudah nemu building nya
-                            }
-                            if(active[b] && (j == buildingX[b] || j==buildingX[b]-1) && i == buildingY[b]){
-                                cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                isBuilding = true; // isbuilding di set true
-                                break; // stop loop nya karena kita sudah nemu building nya
-                            }
-                        }
-                        else if(seedb[b]==3){
-                            if (active[b] && (i == buildingY[b] || i == buildingY[b]-1) && (j == buildingX[b] || j==buildingX[b]-1) ) {
-                                cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                isBuilding = true; // isbuilding di set true
-                                break; // stop loop nya karena kita sudah nemu building nya
-                            }
-                        }
-                        else if(seedb[b]==4){
-                            if(active[b]&&(i == buildingY[b] || i == buildingY[b]-1) && j==buildingX[b]){
-                                cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                isBuilding = true; // isbuilding di set true
-                                break; // stop loop nya karena kita sudah nemu building nya
-                            }
-                            if(active[b] && (j == buildingX[b] || j==buildingX[b]+1 || j==buildingX[b]-1) && i == buildingY[b]){
-                                cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                isBuilding = true; // isbuilding di set true
-                                break; // stop loop nya karena kita sudah nemu building nya
-                            }
-                        }
-                        else if(seedb[b]==5){
-                            if(active[b]&& i==buildingY[b]-1 && j==buildingX[b]){
-                                cout<<"W ";
-                                isBuilding=true;
-                                break;
-                            }
-                        }
-                        else if(seedb[b]==6){
-                            if(active[b]&& i==buildingY[b]-2 && j==buildingX[b]){
-                                cout<<"W ";
-                                isBuilding=true;
-                                break;
-                            }
-                        }
-                        // <IMPORTANT> perbedaan isBuilding sama active itu, active nge cek klo building active di game itu, di mana isBuilding nge cek klo building aktif di posisi itu
-                        //             jadi kurang lebih isBuilding itu lebih kayak temp
-                    }
-                    if (isBuilding) continue;
-
-                    if (i == y && j == x && twerk==1) {
-                        cout<<"d ";
-                    }
-                    else if((i==y-1|| i==y)&& j==x && twerk==0){
-                        cout<<"D ";
-                    }
-                    else {
-                        cout << maps[i][j] << " ";
-                    }
-                }
-                cout << endl;
-            }
-            if(twerk==0){
-                cout<<"Press w to jump 2 blocks"<<endl<<"Press shift+w to jump 3 blocks"<<endl<<"Press s to toggle crouch";
-            }
-            else if(twerk==1){
-                cout<<"Press s to untoggle crouch";
-            }
+            scoring(score,mul);
+            building(seedb,buildingY,buildingX,active,y,x,twerk,maps);
+            twnot(twerk);
             Sleep(100-5*mul);
 
             if (kbhit()) {
@@ -356,148 +400,17 @@ int main()
                 if (key == 'w' && twerk==0) { // renderin for making the player go up
                     for (int h = 0; h < 2; h++) {
                         system("cls");
-                        for (int i = 0; i < MAX_BUILDINGS; i++) {
-                            if (active[i]) buildingX[i]--;
-                        }
-
+                        beware(active,buildingX);
                         y--; //buat player lompat
-                        score+=10;
-                        if(mul<10){
-                            mul=score/250;
-                        }
+                        scoring(score,mul);
                         checkcol(seedb,active,x,y,buildingX,buildingY,menu1,twerk);
                         if(menu1==5){
-                            cout << "Game Over!" << endl<<"Enter your name: ";
-                            cin>>name;
-                            hsname.push_back(name);
-                            intscore.push_back(score);
-                            stringstream ss;
-                            ss<<score;
-                            tempname=ss.str();
-                            hsscore.push_back(tempname);
-                            for(int i=0;i<intscore.size();i++){
-                                for(int j=0;j<intscore.size();j++){
-                                    if(intscore[i]>intscore[j]){
-                                        tempscore2=intscore[i];
-                                        tempscore=hsscore[i];
-                                        tempname=hsname[i];
-                                        intscore[i]=intscore[j];
-                                        hsscore[i]=hsscore[j];
-                                        hsname[i]=hsname[j];
-                                        intscore[j]=tempscore2;
-                                        hsscore[j]=tempscore;
-                                        hsname[j]=tempname;
-                                    }
-                                }
-                            }
-                            if(intscore.size()>5){
-                                intscore.erase(intscore.begin()+5);
-                                hsscore.erase(hsscore.begin()+5);
-                                hsname.erase(hsname.begin()+5);
-                            }
-                            outf.open("hsname.txt",ios::out);
-                            for(int i=0;i<hsname.size();i++){
-                                outf<<hsname[i]<<endl;
-                            }
-                            outf.close();
-                            outf.open("hsscore.txt",ios::out);
-                            for(int i=0;i<intscore.size();i++){
-                                outf<<intscore[i]<<endl;
-                            }
-                            outf.close();
+                            gameover(hsname,hsscore,intscore,score);
                             menu1=7;
                             break;
                         }
-                        cout<<"Score: "<<score<<endl;
-                        for (int i = 0; i < 10; i++) {
-                            for (int j = 0; j < 50; j++) {
-                                bool isBuilding = false;
-                                for (int b = 0; b < MAX_BUILDINGS; b++) {
-                                    if(seedb[b]==0){
-                                        if (active[b] && i == buildingY[b] && j == buildingX[b]) {
-                                            cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                            isBuilding = true; // isbuilding di set true
-                                            break; // stop loop nya karena kita sudah nemu building nya
-                                        }
-                                    }
-                                    else if(seedb[b]==1){
-                                        if (active[b] && (i == buildingY[b] || i == buildingY[b]-1) && j==buildingX[b] ) {
-                                            cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                            isBuilding = true; // isbuilding di set true
-                                            break; // stop loop nya karena kita sudah nemu building nya
-                                        }
-                                        if(active[b] && (j == buildingX[b] || j==buildingX[b]+1) && i == buildingY[b]){
-                                            cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                            isBuilding = true; // isbuilding di set true
-                                            break; // stop loop nya karena kita sudah nemu building nya
-                                        }
-                                    }
-                                    else if(seedb[b]==2){
-                                        if (active[b] && (i == buildingY[b] || i == buildingY[b]-1) && j==buildingX[b] ) {
-                                            cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                            isBuilding = true; // isbuilding di set true
-                                            break; // stop loop nya karena kita sudah nemu building nya
-                                        }
-                                        if(active[b] && (j == buildingX[b] || j==buildingX[b]-1) && i == buildingY[b]){
-                                            cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                            isBuilding = true; // isbuilding di set true
-                                            break; // stop loop nya karena kita sudah nemu building nya
-                                        }
-                                    }
-                                    else if(seedb[b]==3){
-                                        if (active[b] && (i == buildingY[b] || i == buildingY[b]-1) && (j == buildingX[b] || j==buildingX[b]-1) ) {
-                                            cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                            isBuilding = true; // isbuilding di set true
-                                            break; // stop loop nya karena kita sudah nemu building nya
-                                        }
-                                    }
-                                    else if(seedb[b]==4){
-                                        if(active[b]&&(i == buildingY[b] || i == buildingY[b]-1) && j==buildingX[b]){
-                                            cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                            isBuilding = true; // isbuilding di set true
-                                            break; // stop loop nya karena kita sudah nemu building nya
-                                        }
-                                        if(active[b] && (j == buildingX[b] || j==buildingX[b]+1 || j==buildingX[b]-1) && i == buildingY[b]){
-                                            cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                            isBuilding = true; // isbuilding di set true
-                                            break; // stop loop nya karena kita sudah nemu building nya
-                                        }
-                                    }
-                                    else if(seedb[b]==5){
-                                        if(active[b]&& i==buildingY[b]-1 && j==buildingX[b]){
-                                            cout<<"W ";
-                                            isBuilding=true;
-                                            break;
-                                        }
-                                    }
-                                    else if(seedb[b]==6){
-                                        if(active[b]&& i==buildingY[b]-2 && j==buildingX[b]){
-                                            cout<<"W ";
-                                            isBuilding=true;
-                                            break;
-                                        }
-                                    }
-                                }
-                                if (isBuilding) continue;
-
-                                if (i == y && j == x && twerk==1) {
-                                    cout<<"d ";
-                                }
-                                else if((i==y-1|| i==y)&& j==x && twerk==0){
-                                    cout<<"D ";
-                                }
-                                else {
-                                    cout << maps[i][j] << " ";
-                                }
-                            }
-                            cout<<endl;
-                        }
-                        if(twerk==0){
-                            cout<<"Press w to jump 2 blocks"<<endl<<"Press shift+w to jump 3 blocks"<<endl<<"Press s to toggle crouch";
-                        }
-                        else if(twerk==1){
-                            cout<<"Press s to untoggle crouch";
-                        }
+                        building(seedb,buildingY,buildingX,active,y,x,twerk,maps);
+                        twnot(twerk);
                         Sleep(100-5*mul);
                     }
                     // <IMPORTANT><IMPORTANT><IMPORTANT><IMPORTANT><IMPORTANT><IMPORTANT><IMPORTANT><IMPORTANT>
@@ -509,458 +422,53 @@ int main()
 
                     for (int h = 0; h < 2; h++) {
                         system("cls");
-                        for (int i = 0; i < MAX_BUILDINGS; i++) {
-                            if (active[i]) buildingX[i]--; // rendering for makking the player go down
-                        }
-
+                        beware(active,buildingX);
                         y++;
-                        score+=10;
-                        if(mul<10){
-                            mul=score/250;
-                        }
+                        scoring(score,mul);
                         checkcol(seedb,active,x,y,buildingX,buildingY,menu1,twerk);
                         if(menu1==5){
-                            cout << "Game Over!" << endl<<"Enter your name: ";
-                            cin>>name;
-                            hsname.push_back(name);
-                            intscore.push_back(score);
-                            stringstream ss;
-                            ss<<score;
-                            tempname=ss.str();
-                            hsscore.push_back(tempname);
-                            for(int i=0;i<intscore.size();i++){
-                                for(int j=0;j<intscore.size();j++){
-                                    if(intscore[i]>intscore[j]){
-                                        tempscore2=intscore[i];
-                                        tempscore=hsscore[i];
-                                        tempname=hsname[i];
-                                        intscore[i]=intscore[j];
-                                        hsscore[i]=hsscore[j];
-                                        hsname[i]=hsname[j];
-                                        intscore[j]=tempscore2;
-                                        hsscore[j]=tempscore;
-                                        hsname[j]=tempname;
-                                    }
-                                }
-                            }
-                            if(intscore.size()>5){
-                                intscore.erase(intscore.begin()+5);
-                                hsscore.erase(hsscore.begin()+5);
-                                hsname.erase(hsname.begin()+5);
-                            }
-                            outf.open("hsname.txt",ios::out);
-                            for(int i=0;i<hsname.size();i++){
-                                outf<<hsname[i]<<endl;
-                            }
-                            outf.close();
-                            outf.open("hsscore.txt",ios::out);
-                            for(int i=0;i<intscore.size();i++){
-                                outf<<intscore[i]<<endl;
-                            }
-                            outf.close();
+                            gameover(hsname,hsscore,intscore,score);
                             menu1=7;
                             break;
                         }
-                        cout<<"Score: "<<score<<endl;
-                        for (int i = 0; i < 10; i++) {
-                            for (int j = 0; j < 50; j++) {
-                                bool isBuilding = false;
-                                for (int b = 0; b < MAX_BUILDINGS; b++) {
-                                    if(seedb[b]==0){
-                                        if (active[b] && i == buildingY[b] && j == buildingX[b]) {
-                                            cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                            isBuilding = true; // isbuilding di set true
-                                            break; // stop loop nya karena kita sudah nemu building nya
-                                        }
-                                    }
-                                    else if(seedb[b]==1){
-                                        if (active[b] && (i == buildingY[b] || i == buildingY[b]-1) && j==buildingX[b] ) {
-                                            cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                            isBuilding = true; // isbuilding di set true
-                                            break; // stop loop nya karena kita sudah nemu building nya
-                                        }
-                                        if(active[b] && (j == buildingX[b] || j==buildingX[b]+1) && i == buildingY[b]){
-                                            cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                            isBuilding = true; // isbuilding di set true
-                                            break; // stop loop nya karena kita sudah nemu building nya
-                                        }
-                                    }
-                                    else if(seedb[b]==2){
-                                        if (active[b] && (i == buildingY[b] || i == buildingY[b]-1) && j==buildingX[b] ) {
-                                            cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                            isBuilding = true; // isbuilding di set true
-                                            break; // stop loop nya karena kita sudah nemu building nya
-                                        }
-                                        if(active[b] && (j == buildingX[b] || j==buildingX[b]-1) && i == buildingY[b]){
-                                            cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                            isBuilding = true; // isbuilding di set true
-                                            break; // stop loop nya karena kita sudah nemu building nya
-                                        }
-                                    }
-                                    else if(seedb[b]==3){
-                                        if (active[b] && (i == buildingY[b] || i == buildingY[b]-1) && (j == buildingX[b] || j==buildingX[b]-1) ) {
-                                            cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                            isBuilding = true; // isbuilding di set true
-                                            break; // stop loop nya karena kita sudah nemu building nya
-                                        }
-                                    }
-                                    else if(seedb[b]==4){
-                                        if(active[b]&&(i == buildingY[b] || i == buildingY[b]-1) && j==buildingX[b]){
-                                            cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                            isBuilding = true; // isbuilding di set true
-                                            break; // stop loop nya karena kita sudah nemu building nya
-                                        }
-                                        if(active[b] && (j == buildingX[b] || j==buildingX[b]+1 || j==buildingX[b]-1) && i == buildingY[b]){
-                                            cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                            isBuilding = true; // isbuilding di set true
-                                            break; // stop loop nya karena kita sudah nemu building nya
-                                        }
-                                    }
-                                    else if(seedb[b]==5){
-                                        if(active[b]&& i==buildingY[b]-1 && j==buildingX[b]){
-                                            cout<<"W ";
-                                            isBuilding=true;
-                                            break;
-                                        }
-                                    }
-                                    else if(seedb[b]==6){
-                                        if(active[b]&& i==buildingY[b]-2 && j==buildingX[b]){
-                                            cout<<"W ";
-                                            isBuilding=true;
-                                            break;
-                                        }
-                                    }
-                                }
-                                if (isBuilding) continue;
-
-                                if (i == y && j == x && twerk==1) {
-                                    cout<<"d ";
-                                }
-                                else if((i==y-1|| i==y)&& j==x && twerk==0){
-                                    cout<<"D ";
-                                }
-                                else {
-                                    cout << maps[i][j] << " ";
-                                }
-                            }
-                            cout<<endl;
-                        }
-                        if(twerk==0){
-                            cout<<"Press w to jump 2 blocks"<<endl<<"Press shift+w to jump 3 blocks"<<endl<<"Press s to toggle crouch";
-                        }
-                        else if(twerk==1){
-                            cout<<"Press s to untoggle crouch";
-                        }
+                        building(seedb,buildingY,buildingX,active,y,x,twerk,maps);
+                        twnot(twerk);
                         Sleep(100-5*mul);
                     }
                 }
                 if (key == 'W' && twerk==0) { // renderin for making the player go up
                     for (int h = 0; h < 3; h++) {
                         system("cls");
-                        for (int i = 0; i < MAX_BUILDINGS; i++) {
-                            if (active[i]) buildingX[i]--;
-                        }
-
+                        beware(active,buildingX);
                         y--; //buat player lompat
-                        score+=10;
-                        if(mul<10){
-                            mul=score/250;
-                        }
+                        scoring(score,mul);
                         checkcol(seedb,active,x,y,buildingX,buildingY,menu1,twerk);
                         if(menu1==5){
-                            cout << "Game Over!" << endl<<"Enter your name: ";
-                            cin>>name;
-                            hsname.push_back(name);
-                            intscore.push_back(score);
-                            stringstream ss;
-                            ss<<score;
-                            tempname=ss.str();
-                            hsscore.push_back(tempname);
-                            for(int i=0;i<intscore.size();i++){
-                                for(int j=0;j<intscore.size();j++){
-                                    if(intscore[i]>intscore[j]){
-                                        tempscore2=intscore[i];
-                                        tempscore=hsscore[i];
-                                        tempname=hsname[i];
-                                        intscore[i]=intscore[j];
-                                        hsscore[i]=hsscore[j];
-                                        hsname[i]=hsname[j];
-                                        intscore[j]=tempscore2;
-                                        hsscore[j]=tempscore;
-                                        hsname[j]=tempname;
-                                    }
-                                }
-                            }
-                            if(intscore.size()>5){
-                                intscore.erase(intscore.begin()+5);
-                                hsscore.erase(hsscore.begin()+5);
-                                hsname.erase(hsname.begin()+5);
-                            }
-                            outf.open("hsname.txt",ios::out);
-                            for(int i=0;i<hsname.size();i++){
-                                outf<<hsname[i]<<endl;
-                            }
-                            outf.close();
-                            outf.open("hsscore.txt",ios::out);
-                            for(int i=0;i<intscore.size();i++){
-                                outf<<intscore[i]<<endl;
-                            }
-                            outf.close();
+                            gameover(hsname,hsscore,intscore,score);
                             menu1=7;
                             break;
                         }
-                        cout<<"Score: "<<score<<endl;
-                        for (int i = 0; i < 10; i++) {
-                            for (int j = 0; j < 50; j++) {
-                                bool isBuilding = false;
-                                for (int b = 0; b < MAX_BUILDINGS; b++) {
-                                    if(seedb[b]==0){
-                                        if (active[b] && i == buildingY[b] && j == buildingX[b]) {
-                                            cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                            isBuilding = true; // isbuilding di set true
-                                            break; // stop loop nya karena kita sudah nemu building nya
-                                        }
-                                    }
-                                    else if(seedb[b]==1){
-                                        if (active[b] && (i == buildingY[b] || i == buildingY[b]-1) && j==buildingX[b] ) {
-                                            cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                            isBuilding = true; // isbuilding di set true
-                                            break; // stop loop nya karena kita sudah nemu building nya
-                                        }
-                                        if(active[b] && (j == buildingX[b] || j==buildingX[b]+1) && i == buildingY[b]){
-                                            cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                            isBuilding = true; // isbuilding di set true
-                                            break; // stop loop nya karena kita sudah nemu building nya
-                                        }
-                                    }
-                                    else if(seedb[b]==2){
-                                        if (active[b] && (i == buildingY[b] || i == buildingY[b]-1) && j==buildingX[b] ) {
-                                            cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                            isBuilding = true; // isbuilding di set true
-                                            break; // stop loop nya karena kita sudah nemu building nya
-                                        }
-                                        if(active[b] && (j == buildingX[b] || j==buildingX[b]-1) && i == buildingY[b]){
-                                            cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                            isBuilding = true; // isbuilding di set true
-                                            break; // stop loop nya karena kita sudah nemu building nya
-                                        }
-                                    }
-                                    else if(seedb[b]==3){
-                                        if (active[b] && (i == buildingY[b] || i == buildingY[b]-1) && (j == buildingX[b] || j==buildingX[b]-1) ) {
-                                            cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                            isBuilding = true; // isbuilding di set true
-                                            break; // stop loop nya karena kita sudah nemu building nya
-                                        }
-                                    }
-                                    else if(seedb[b]==4){
-                                        if(active[b]&&(i == buildingY[b] || i == buildingY[b]-1) && j==buildingX[b]){
-                                            cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                            isBuilding = true; // isbuilding di set true
-                                            break; // stop loop nya karena kita sudah nemu building nya
-                                        }
-                                        if(active[b] && (j == buildingX[b] || j==buildingX[b]+1 || j==buildingX[b]-1) && i == buildingY[b]){
-                                            cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                            isBuilding = true; // isbuilding di set true
-                                            break; // stop loop nya karena kita sudah nemu building nya
-                                        }
-                                    }
-                                    else if(seedb[b]==5){
-                                        if(active[b]&& i==buildingY[b]-1 && j==buildingX[b]){
-                                            cout<<"W ";
-                                            isBuilding=true;
-                                            break;
-                                        }
-                                    }
-                                    else if(seedb[b]==6){
-                                        if(active[b]&& i==buildingY[b]-2 && j==buildingX[b]){
-                                            cout<<"W ";
-                                            isBuilding=true;
-                                            break;
-                                        }
-                                    }
-                                }
-                                if (isBuilding) continue;
-
-                                if (i == y && j == x && twerk==1) {
-                                    cout<<"d ";
-                                }
-                                else if((i==y-1|| i==y)&& j==x && twerk==0){
-                                    cout<<"D ";
-                                }
-                                else {
-                                    cout << maps[i][j] << " ";
-                                }
-                            }
-                            cout<<endl;
-                        }
-                        if(twerk==0){
-                            cout<<"Press w to jump 2 blocks"<<endl<<"Press shift+w to jump 3 blocks"<<endl<<"Press s to toggle crouch";
-                        }
-                        else if(twerk==1){
-                            cout<<"Press s to untoggle crouch";
-                        }
+                        building(seedb,buildingY,buildingX,active,y,x,twerk,maps);
+                        twnot(twerk);
                         Sleep(100-5*mul);
                     }
-                    // <IMPORTANT><IMPORTANT><IMPORTANT><IMPORTANT><IMPORTANT><IMPORTANT><IMPORTANT><IMPORTANT>
-                    // klo km blm notice kita ada 3 kyk ginian di code nya, yang pertama funsinya untuk render map sebelum input
-                    // yang kedua untuk render map setelah press w dan player ke ata, yang ketiga untuk render map saat player nya ke bawah
-                    // klo kita cm ada satu tok, nanti player nya antara gk bisa gerak, atau code nya rusak
-                    // bisa seh pake satu tapi perlu pake function
-                    // THIS IS WHAT WE MUST GO THROUGH IF WE DON'T USE FUNTION BEN, LIFE COULD HAVE BEEN A LOT SIMPLER
-
                     for (int h = 0; h < 3; h++) {
                         system("cls");
-                        for (int i = 0; i < MAX_BUILDINGS; i++) {
-                            if (active[i]) buildingX[i]--; // rendering for makking the player go down
-                        }
-
+                        beware(active,buildingX);
                         y++;
-                        score+=10;
-                        if(mul<10){
-                            mul=score/250;
-                        }
+                        scoring(score,mul);
                         checkcol(seedb,active,x,y,buildingX,buildingY,menu1,twerk);
                         if(menu1==5){
-                            cout << "Game Over!" << endl<<"Enter your name: ";
-                            cin>>name;
-                            hsname.push_back(name);
-                            intscore.push_back(score);
-                            stringstream ss;
-                            ss<<score;
-                            tempname=ss.str();
-                            hsscore.push_back(tempname);
-                            for(int i=0;i<intscore.size();i++){
-                                for(int j=0;j<intscore.size();j++){
-                                    if(intscore[i]>intscore[j]){
-                                        tempscore2=intscore[i];
-                                        tempscore=hsscore[i];
-                                        tempname=hsname[i];
-                                        intscore[i]=intscore[j];
-                                        hsscore[i]=hsscore[j];
-                                        hsname[i]=hsname[j];
-                                        intscore[j]=tempscore2;
-                                        hsscore[j]=tempscore;
-                                        hsname[j]=tempname;
-                                    }
-                                }
-                            }
-                            if(intscore.size()>5){
-                                intscore.erase(intscore.begin()+5);
-                                hsscore.erase(hsscore.begin()+5);
-                                hsname.erase(hsname.begin()+5);
-                            }
-                            outf.open("hsname.txt",ios::out);
-                            for(int i=0;i<hsname.size();i++){
-                                outf<<hsname[i]<<endl;
-                            }
-                            outf.close();
-                            outf.open("hsscore.txt",ios::out);
-                            for(int i=0;i<intscore.size();i++){
-                                outf<<intscore[i]<<endl;
-                            }
-                            outf.close();
+                            gameover(hsname,hsscore,intscore,score);
                             menu1=7;
                             break;
                         }
-                        cout<<"Score: "<<score<<endl;
-                        for (int i = 0; i < 10; i++) {
-                            for (int j = 0; j < 50; j++) {
-                                bool isBuilding = false;
-                                for (int b = 0; b < MAX_BUILDINGS; b++) {
-                                    if(seedb[b]==0){
-                                        if (active[b] && i == buildingY[b] && j == buildingX[b]) {
-                                            cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                            isBuilding = true; // isbuilding di set true
-                                            break; // stop loop nya karena kita sudah nemu building nya
-                                        }
-                                    }
-                                    else if(seedb[b]==1){
-                                        if (active[b] && (i == buildingY[b] || i == buildingY[b]-1) && j==buildingX[b] ) {
-                                            cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                            isBuilding = true; // isbuilding di set true
-                                            break; // stop loop nya karena kita sudah nemu building nya
-                                        }
-                                        if(active[b] && (j == buildingX[b] || j==buildingX[b]+1) && i == buildingY[b]){
-                                            cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                            isBuilding = true; // isbuilding di set true
-                                            break; // stop loop nya karena kita sudah nemu building nya
-                                        }
-                                    }
-                                    else if(seedb[b]==2){
-                                        if (active[b] && (i == buildingY[b] || i == buildingY[b]-1) && j==buildingX[b] ) {
-                                            cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                            isBuilding = true; // isbuilding di set true
-                                            break; // stop loop nya karena kita sudah nemu building nya
-                                        }
-                                        if(active[b] && (j == buildingX[b] || j==buildingX[b]-1) && i == buildingY[b]){
-                                            cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                            isBuilding = true; // isbuilding di set true
-                                            break; // stop loop nya karena kita sudah nemu building nya
-                                        }
-                                    }
-                                    else if(seedb[b]==3){
-                                        if (active[b] && (i == buildingY[b] || i == buildingY[b]-1) && (j == buildingX[b] || j==buildingX[b]-1) ) {
-                                            cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                            isBuilding = true; // isbuilding di set true
-                                            break; // stop loop nya karena kita sudah nemu building nya
-                                        }
-                                    }
-                                    else if(seedb[b]==4){
-                                        if(active[b]&&(i == buildingY[b] || i == buildingY[b]-1) && j==buildingX[b]){
-                                            cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                            isBuilding = true; // isbuilding di set true
-                                            break; // stop loop nya karena kita sudah nemu building nya
-                                        }
-                                        if(active[b] && (j == buildingX[b] || j==buildingX[b]+1 || j==buildingX[b]-1) && i == buildingY[b]){
-                                            cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                                            isBuilding = true; // isbuilding di set true
-                                            break; // stop loop nya karena kita sudah nemu building nya
-                                        }
-                                    }
-                                    else if(seedb[b]==5){
-                                        if(active[b]&& i==buildingY[b]-1 && j==buildingX[b]){
-                                            cout<<"W ";
-                                            isBuilding=true;
-                                            break;
-                                        }
-                                    }
-                                    else if(seedb[b]==6){
-                                        if(active[b]&& i==buildingY[b]-2 && j==buildingX[b]){
-                                            cout<<"W ";
-                                            isBuilding=true;
-                                            break;
-                                        }
-                                    }
-                                }
-                                if (isBuilding) continue;
-
-                                if (i == y && j == x && twerk==1) {
-                                    cout<<"d ";
-                                }
-                                else if((i==y-1|| i==y)&& j==x && twerk==0){
-                                    cout<<"D ";
-                                }
-                                else {
-                                    cout << maps[i][j] << " ";
-                                }
-                            }
-                            cout<<endl;
-                        }
-                        if(twerk==0){
-                            cout<<"Press w to jump 2 blocks"<<endl<<"Press shift+w to jump 3 blocks"<<endl<<"Press s to toggle crouch";
-                        }
-                        else if(twerk==1){
-                            cout<<"Press s to untoggle crouch";
-                        }
+                        building(seedb,buildingY,buildingX,active,y,x,twerk,maps);
+                        twnot(twerk);
                         Sleep(100-5*mul);
                     }
                 }
-                if(key=='s' && twerk==0){
-                    twerk=1;
-                }
-                else if(key=='s' && twerk==1){
-                    twerk=0;
-                }
+                crouch(key,twerk);
             }
         }
         while(menu1==2){
@@ -970,8 +478,7 @@ int main()
             }
             cout<<"0. Exit"<<endl;
             do{
-                cout<<">>";
-                cin>>menu2;
+                menu(menu2);
             }while(menu2!=0);
             if(menu2==0){
                 menu1=7;
@@ -981,6 +488,5 @@ int main()
             break;
         }
     }
-
     return 0;
 }
