@@ -1,491 +1,191 @@
 #include <iostream>
 #include <string>
-#include <iomanip>
-#include <stdlib.h>
-#include <time.h>
+#include <vector>
+#include <fstream>
+#include <algorithm>
 #include <conio.h>
 #include <windows.h>
-#include <fstream>
-#include <vector>
-#include <sstream>
+#include <time.h>
 
 using namespace std;
 
-void checkcol(int seedb[3],bool active[3],int x,int y,int buildingX[3], int buildingY[3],int &menu1,int twerk){
-    if(twerk==1){
-        for (int i = 0; i < 3; i++) {
-            if(active[i]){
-                if(seedb[i]==0){
-                    if (x == buildingX[i] && y == buildingY[i]) { // logic nya jika building yang aktif posisinya == x dan y player, artinya terjadi kolisi lalu mati
-                        menu1=5;
-                    }
-                }
-                else if(seedb[i]==1){
-                    if ((y == buildingY[i] && x==buildingX[i]) || (y == buildingY[i]-1 && x==buildingX[i])) {
-                        menu1=5;
-                    }
-                    if((y == buildingY[i] && x==buildingX[i]+1) || (y == buildingY[i] && x == buildingX[i])){
-                        menu1=5;
-                    }
-                }
-                else if(seedb[i]==2){
-                    if((x == buildingX[i] && y == buildingY[i]-1) || (x==buildingX[i] && y==buildingY[i])) {
-                        menu1=5;
-                    }
-                    if((y == buildingY[i] && x==buildingX[i]-1) || (y == buildingY[i] && x==buildingX[i])){
-                        menu1=5;
-                    }
-                }
-                else if(seedb[i]==3){
-                    if ((y == buildingY[i] || y == buildingY[i]-1) && (x == buildingX[i] || x==buildingX[i]-1) ) {
-                        menu1=5;
-                    }
-                }
-                else if(seedb[i]==4){
-                    if((x == buildingX[i] && y == buildingY[i]-1) && (x==buildingX[i] && y==buildingY[i])){
-                        menu1=5;
-                    }
-                    if((x == buildingX[i]+1 && y == buildingY[i])||(x == buildingX[i]-1 && y == buildingY[i])||(x == buildingX[i] && y == buildingY[i])){
-                        menu1=5;
-                    }
-                }
-                else if(seedb[i]==5){
-                    if(x==buildingX[i] && y==buildingY[i]-1){
-                        menu1=5;
-                    }
-                }
-                else if(seedb[i]==6){
-                    if(x==buildingX[i] && y==buildingY[i]-2){
-                        menu1=5;
-                    }
-                }
+// Define obstacle shapes as relative coordinates (dy, dx)
+const vector<vector<pair<int, int>>> obShapes = {
+    {{0,0}},                               // 0: Normal block
+    {{0,0}, {-1,0}, {0,1}},                // 1: L-shape right
+    {{0,0}, {-1,0}, {0,-1}},               // 2: L-shape left
+    {{0,0}, {-1,0}, {0,-1}, {-1,-1}},      // 3: 2x2 block
+    {{0,0}, {-1,0}, {0,1}, {0,-1}},        // 4: Upside-down T
+    {{-1,0}},                              // 5: Low bird
+    {{-2,0}}                               // 6: High bird
+};
+
+struct ScoreRec {
+    string name;
+    int score;
+};
+
+// --- DATA HANDLING ---
+void loadScores(vector<ScoreRec>& scores) {
+    scores.clear();
+    ifstream inf("hsname.txt"), isf("hsscore.txt");
+    string n; int s;
+    while (inf >> n && isf >> s) scores.push_back({n, s});
+}
+
+void saveScores(vector<ScoreRec>& scores) {
+    ofstream outf("hsname.txt"), outs("hsscore.txt");
+    for (auto& rec : scores) {
+        outf << rec.name << "\n";
+        outs << rec.score << "\n";
+    }
+}
+
+void gameover(vector<ScoreRec>& scores, int newScore) {
+    cout << "Game Over!\nEnter your name: ";
+    string name;
+    cin >> name;
+    scores.push_back({name, newScore});
+    
+    // Sort descending and keep top 5
+    sort(scores.begin(), scores.end(), [](const ScoreRec& a, const ScoreRec& b){ return a.score > b.score; });
+    if (scores.size() > 5) scores.resize(5);
+    
+    saveScores(scores);
+}
+
+// --- GAME LOGIC ---
+bool checkCollision(int px, int py, int twerk, int seedb[], bool active[], int bX[], int bY[]) {
+    vector<pair<int, int>> playerPts = {{py, px}};
+    if (twerk == 0) playerPts.push_back({py - 1, px}); // Standing takes 2 vertical blocks
+
+    for (int i = 0; i < 3; i++) {
+        if (!active[i]) continue;
+        for (auto& pt : obShapes[seedb[i]]) {
+            int obY = bY[i] + pt.first, obX = bX[i] + pt.second;
+            for (auto& pPt : playerPts) {
+                if (pPt.first == obY && pPt.second == obX) return true;
             }
         }
     }
-    else if(twerk==0){
-        for (int i = 0; i < 3; i++) {
-            if(active[i]){
-                if(seedb[i]==0){
-                    if ((x == buildingX[i] && y == buildingY[i])||(x == buildingX[i] && y == buildingY[i])) { // logic nya jika building yang aktif posisinya == x dan y player, artinya terjadi kolisi lalu mati
-                        menu1=5;
-                    }
-                }
-                else if(seedb[i]==1){
-                    if (((y == buildingY[i] && x==buildingX[i]) || (y == buildingY[i]-1 && x==buildingX[i])) || ((y-1 == buildingY[i] && x==buildingX[i]) || (y-1 == buildingY[i]-1 && x==buildingX[i]))) {
-                        menu1=5;
-                    }
-                    if(((y == buildingY[i] && x==buildingX[i]+1) || (y == buildingY[i] && x == buildingX[i])) || ((y-1 == buildingY[i] && x==buildingX[i]+1) || (y-1 == buildingY[i] && x == buildingX[i]))){
-                        menu1=5;
-                    }
-                }
-                else if(seedb[i]==2){
-                    if(((x == buildingX[i] && y == buildingY[i]-1) || (x==buildingX[i] && y==buildingY[i])) || ((x == buildingX[i] && y-1 == buildingY[i]-1) || (x==buildingX[i] && y-1==buildingY[i]))) {
-                        menu1=5;
-                    }
-                    if(((y == buildingY[i] && x==buildingX[i]-1) || (y == buildingY[i] && x==buildingX[i])) || ((y-1 == buildingY[i] && x==buildingX[i]-1) || (y-1 == buildingY[i] && x==buildingX[i]))){
-                        menu1=5;
-                    }
-                }
-                else if(seedb[i]==3){
-                    if (((y == buildingY[i] || y == buildingY[i]-1) && (x == buildingX[i] || x==buildingX[i]-1)) || ((y-1 == buildingY[i] || y-1 == buildingY[i]-1) && (x == buildingX[i] || x==buildingX[i]-1))) {
-                        menu1=5;
-                    }
-                }
-                else if(seedb[i]==4){
-                    if(((x == buildingX[i] && y == buildingY[i]-1) && (x==buildingX[i] && y==buildingY[i])) || ((x == buildingX[i] && y-1 == buildingY[i]-1) && (x==buildingX[i] && y-1==buildingY[i]))){
-                        menu1=5;
-                    }
-                    if(((x == buildingX[i]+1 && y == buildingY[i])||(x == buildingX[i]-1 && y == buildingY[i])||(x == buildingX[i] && y == buildingY[i])) || ((x == buildingX[i]+1 && y-1 == buildingY[i])||(x == buildingX[i]-1 && y-1 == buildingY[i])||(x == buildingX[i] && y-1 == buildingY[i]))){
-                        menu1=5;
-                    }
-                }
-                else if(seedb[i]==5){
-                    if((x==buildingX[i] && y==buildingY[i]-1) || (x==buildingX[i] && y-1==buildingY[i]-1)){
-                        menu1=5;
-                    }
-                }
-                else if(seedb[i]==6){
-                    if((x==buildingX[i] && y==buildingY[i]-2) || (x==buildingX[i] && y-1==buildingY[i]-2)){
-                        menu1=5;
-                    }
-                }
-            }
-        }
-    }
+    return false;
 }
 
-void clearall(vector <string> &hsname,vector <string> &hsscore,vector <int> &intscore){
-    hsname.clear();
-    hsscore.clear();
-    intscore.clear();
-}
-
-void menu(int &menu1){
-    cout<<">>";
-    cin>>menu1;
-}
-
-void twnot(int twerk){
-    if(twerk==0){
-        cout<<"Press w to jump 2 blocks"<<endl<<"Press shift+w to jump 3 blocks"<<endl<<"Press s to toggle crouch";
-    }
-    else if(twerk==1){
-        cout<<"Press s to untoggle crouch";
-    }
-}
-
-void gameover(vector <string> &hsname,vector <string> &hsscore,vector <int> &intscore,int score){
-    string name,tempscore,tempname;
-    int tempscore2;
-    fstream inf,outf;
-    cout << "Game Over!" << endl<<"Enter your name: ";
-    cin>>name;
-    hsname.push_back(name);
-    intscore.push_back(score);
-    stringstream ss;
-    ss<<score;
-    tempname=ss.str();
-    hsscore.push_back(tempname);
-    for(int i=0;i<intscore.size();i++){
-        for(int j=0;j<intscore.size();j++){
-            if(intscore[i]>intscore[j]){
-                tempscore2=intscore[i];
-                tempscore=hsscore[i];
-                tempname=hsname[i];
-                intscore[i]=intscore[j];
-                hsscore[i]=hsscore[j];
-                hsname[i]=hsname[j];
-                intscore[j]=tempscore2;
-                hsscore[j]=tempscore;
-                hsname[j]=tempname;
-            }
-        }
-    }
-    if(intscore.size()>5){
-        intscore.erase(intscore.begin()+5);
-        hsscore.erase(hsscore.begin()+5);
-        hsname.erase(hsname.begin()+5);
-    }
-    outf.open("hsname.txt",ios::out);
-    for(int i=0;i<hsname.size();i++){
-        outf<<hsname[i]<<endl;
-    }
-    outf.close();
-    outf.open("hsscore.txt",ios::out);
-    for(int i=0;i<intscore.size();i++){
-        outf<<intscore[i]<<endl;
-    }
-    outf.close();
-}
-
-void building(int seedb[3],int buildingY[3],int buildingX[3],bool active[3],int y,int x,int twerk,string maps[10][50]){
+void drawMap(int x, int y, int twerk, int seedb[], bool active[], int bX[], int bY[], int score) {
+    system("cls");
+    cout << "Score: " << score << "\n";
     for (int i = 0; i < 10; i++) {
         for (int j = 0; j < 50; j++) {
-            bool isBuilding = false;
-            for (int b = 0; b < 3; b++) {
-                if(seedb[b]==0){
-                    if (active[b] && i == buildingY[b] && j == buildingX[b]) {
-                        cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                        isBuilding = true; // isbuilding di set true
-                        break; // stop loop nya karena kita sudah nemu building nya
-                    }
-                }
-                else if(seedb[b]==1){
-                    if (active[b] && (i == buildingY[b] || i == buildingY[b]-1) && j==buildingX[b] ) {
-                        cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                        isBuilding = true; // isbuilding di set true
-                        break; // stop loop nya karena kita sudah nemu building nya
-                    }
-                    if(active[b] && (j == buildingX[b] || j==buildingX[b]+1) && i == buildingY[b]){
-                        cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                        isBuilding = true; // isbuilding di set true
-                        break; // stop loop nya karena kita sudah nemu building nya
-                    }
-                }
-                else if(seedb[b]==2){
-                    if (active[b] && (i == buildingY[b] || i == buildingY[b]-1) && j==buildingX[b] ) {
-                        cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                        isBuilding = true; // isbuilding di set true
-                        break; // stop loop nya karena kita sudah nemu building nya
-                    }
-                    if(active[b] && (j == buildingX[b] || j==buildingX[b]-1) && i == buildingY[b]){
-                        cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                        isBuilding = true; // isbuilding di set true
-                        break; // stop loop nya karena kita sudah nemu building nya
-                    }
-                }
-                else if(seedb[b]==3){
-                    if (active[b] && (i == buildingY[b] || i == buildingY[b]-1) && (j == buildingX[b] || j==buildingX[b]-1) ) {
-                        cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                        isBuilding = true; // isbuilding di set true
-                        break; // stop loop nya karena kita sudah nemu building nya
-                    }
-                }
-                else if(seedb[b]==4){
-                    if(active[b]&&(i == buildingY[b] || i == buildingY[b]-1) && j==buildingX[b]){
-                        cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                        isBuilding = true; // isbuilding di set true
-                        break; // stop loop nya karena kita sudah nemu building nya
-                    }
-                    if(active[b] && (j == buildingX[b] || j==buildingX[b]+1 || j==buildingX[b]-1) && i == buildingY[b]){
-                        cout << "T "; // kalau ada building maka akan di gambar sebuah building
-                        isBuilding = true; // isbuilding di set true
-                        break; // stop loop nya karena kita sudah nemu building nya
-                    }
-                }
-                else if(seedb[b]==5){
-                    if(active[b]&& i==buildingY[b]-1 && j==buildingX[b]){
-                        cout<<"W ";
-                        isBuilding=true;
-                        break;
-                    }
-                }
-                else if(seedb[b]==6){
-                    if(active[b]&& i==buildingY[b]-2 && j==buildingX[b]){
-                        cout<<"W ";
-                        isBuilding=true;
-                        break;
+            bool drawn = false;
+            // Draw Obstacles
+            for (int b = 0; b < 3 && !drawn; b++) {
+                if (!active[b]) continue;
+                for (auto& pt : obShapes[seedb[b]]) {
+                    if (i == bY[b] + pt.first && j == bX[b] + pt.second) {
+                        cout << (seedb[b] >= 5 ? "W " : "T ");
+                        drawn = true; break;
                     }
                 }
             }
-            if (isBuilding) continue;
+            if (drawn) continue;
 
-            if (i == y && j == x && twerk==1) {
-                cout<<"d ";
-            }
-            else if((i==y-1|| i==y)&& j==x && twerk==0){
-                cout<<"D ";
-            }
-            else {
-                cout << maps[i][j] << " ";
-            }
+            // Draw Player & Map borders
+            if (i == y && j == x) cout << (twerk == 1 ? "d " : "D ");
+            else if (i == y - 1 && j == x && twerk == 0) cout << "D ";
+            else if (i == 0 || i == 9 || j == 0 || j == 49) cout << "# ";
+            else if (i == 7) cout << "* ";
+            else cout << "  ";
         }
-        cout<<endl;
+        cout << "\n";
     }
+    cout << (twerk == 0 ? "Press w to jump 2 blocks\nPress shift+w to jump 3 blocks\nPress s to toggle crouch\n" : "Press s to untoggle crouch\n");
 }
 
-void crouch(char key,int &twerk){
-    if(key=='s' && twerk==0){
-        twerk=1;
-    }
-    else if(key=='s' && twerk==1){
-        twerk=0;
-    }
+bool updateFrame(int &y, int dy, int &score, int &mul, int x, int twerk, int seedb[], bool active[], int bX[], int bY[]) {
+    for (int i = 0; i < 3; i++) if (active[i]) bX[i]--;
+    y += dy;
+    score += 10;
+    mul = min(10, score / 250);
+    
+    if (checkCollision(x, y, twerk, seedb, active, bX, bY)) return true; // Collision occurred
+    
+    drawMap(x, y, twerk, seedb, active, bX, bY, score);
+    Sleep(100 - 5 * mul);
+    return false;
 }
 
-void read(vector <string> &hsname,vector <string> &hsscore){
-    fstream inf,outf;
-    string lines;
-    inf.open("hsname.txt",ios::in);
-    while(getline(inf,lines)){
-        hsname.push_back(lines);
-    }
-    inf.close();
-    inf.open("hsscore.txt",ios::in);
-    while(getline(inf,lines)){
-        hsscore.push_back(lines);
-    }
-    inf.close();
-}
-
-void scoring(int &score, int &mul){
-    score+=10;
-    if(mul<10){
-        mul=score/250;
-    }
-    cout<<"Score: "<<score<<endl;
-}
-
-void beware(bool active[3],int buildingX[3]){
-    for (int i = 0; i < 3; i++) {
-        if (active[i]) buildingX[i]--;
-    }
-}
-
-int main()
-{
+int main() {
     srand(time(0));
-    fstream inf,outf;
-    const int MAX_BUILDINGS = 3; // tau lah ini apa, klo di ganti, juga di ganti array nya buat buildingX dan Y
-    int buildingX[MAX_BUILDINGS] = {-1, -1, -1}; // biar building nya spawn di luar screen
-    int buildingY[MAX_BUILDINGS] = {6, 6, 6}; //buat pastiin building nya spawn di array ke 6 (ground level)
-    bool active[MAX_BUILDINGS] = {false, false, false}; // buat cari tau klo ada atau gk di screen sudah ada brp building yang nyala
-    int seedb[MAX_BUILDINGS]={0,0,0};
-    vector <string> hsname;
-    vector <string> hsscore;
-    vector <int> intscore;
-    string name, tempscore,tempname,lines;
-    int x = 5, y = 6,score=0,menu1,tempscore2,menu2,mul=0,twerk=0;
-    char key;
-    string maps[10][50] = { // map (no shit)
-        {"#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#"},
-        {"#"," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," ","#"},
-        {"#"," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," ","#"},
-        {"#"," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," ","#"},
-        {"#"," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," ","#"},
-        {"#"," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," ","#"},
-        {"#"," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," ","#"},
-        {"#","*","*","*","*","*","*","*","*","*","*","*","*","*","*","*","*","*","*","*","*","*","*","*","*","*","*","*","*","*","*","*","*","*","*","*","*","*","*","*","*","*","*","*","*","*","*","*","*","#"},
-        {"#"," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," ","#"},
-        {"#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#","#"},
-    };
-        clearall(hsname,hsscore,intscore);
-    while(true){
-        for(int i=0;i<3;i++){
-            buildingX[i] = -1; // biar building nya spawn di luar screen
-            buildingY[i] = 6; //buat pastiin building nya spawn di array ke 6 (ground level)
-            active[i] = false; // buat cari tau klo ada atau gk di screen sudah ada brp building yang nyala
-            seedb[i]=0;
-        }
+    vector<ScoreRec> highscores;
+    int bX[3], bY[3], seedb[3];
+    bool active[3];
+    int menuState;
+
+    while (true) {
         system("cls");
-        score=0;
-        mul=0;
-        clearall(hsname,hsscore,intscore);
-        read(hsname, hsscore);
-        for(int i=0;i<hsscore.size();i++){
-            tempscore=hsscore[i];
-            stringstream(tempscore)>>tempscore2;
-            intscore.push_back(tempscore2);
-        }
-        cout<<"Welcome to Ruwarono"<<endl<<"1. Play"<<endl<<"2. Highscores"<<endl<<"0. Embrace Cowardice?"<<endl;
-        do{
-            menu(menu1);
-        }while(menu1>2||menu1<0);
-        int spawnTimer = 0;
-        while (menu1==1) {
-            y=6;
+        loadScores(highscores);
+        cout << "Welcome to Ruwarono\n1. Play\n2. Highscores\n0. Embrace Cowardice?\n>>";
+        cin >> menuState;
+
+        if (menuState == 0) break;
+
+        if (menuState == 2) {
             system("cls");
-            for(int i=0;i<MAX_BUILDINGS;i++){
-                if(!active[i]){
-                    seedb[i]=rand()%7;
-                }
+            for (size_t i = 0; i < highscores.size(); i++) {
+                cout << i + 1 << ". " << highscores[i].name << " " << highscores[i].score << "\n";
             }
-            checkcol(seedb,active,x,y,buildingX,buildingY,menu1,twerk);
-            if(menu1==5){
-                gameover(hsname,hsscore,intscore,score);
-                menu1=7;
-                break;
-            }
-            if (spawnTimer == 0) {
-                for (int i = 0; i < MAX_BUILDINGS; i++) {
-                    if (!active[i]) {
-                        buildingX[i] = 49;// biar spawn nya di ujung kanan screen
-                        active[i] = true; // merubah building nya dari false jadi true
-                        break;
-                    }
-                }
-                spawnTimer = rand() % 10 + 7; // ini lebih kyk buat yang memberi jarak biar building nya tidak terlalu dekat
-            }
-                        // jadi building nya spawn diantara 5 - 15 frame setelah building sebelumnya
-            spawnTimer--; // misal spawntimer randomizer nya 7 frame, spawntimer-- gunanya adalah tiap frame akan dikurang 1 value spawn timernya
-                          // dan selama spawntimer!=0, game akan selalu melewati line 46
-                          // saat sudah 7 frame lewat, maka value nya jadi 0, kalau gitu line 46 bisa di jalankan lagi
-
-            for (int i = 0; i < MAX_BUILDINGS; i++) {
-                if (active[i]) {
-                    buildingX[i]--; // gerakin building nya ke kanan tiap frame
-                    if (buildingX[i] < 0) {
-                        active[i] = false; // kalau building sudah off screen, maka di anggap offline
-                    }
-                }
-            }
-            // yg di bawah ini adalah kode buat gambar map nya
-            scoring(score,mul);
-            building(seedb,buildingY,buildingX,active,y,x,twerk,maps);
-            twnot(twerk);
-            Sleep(100-5*mul);
-
-            if (kbhit()) {
-                key = getch();
-                if (key == 'w' && twerk==0) { // renderin for making the player go up
-                    for (int h = 0; h < 2; h++) {
-                        system("cls");
-                        beware(active,buildingX);
-                        y--; //buat player lompat
-                        scoring(score,mul);
-                        checkcol(seedb,active,x,y,buildingX,buildingY,menu1,twerk);
-                        if(menu1==5){
-                            gameover(hsname,hsscore,intscore,score);
-                            menu1=7;
-                            break;
-                        }
-                        building(seedb,buildingY,buildingX,active,y,x,twerk,maps);
-                        twnot(twerk);
-                        Sleep(100-5*mul);
-                    }
-                    // <IMPORTANT><IMPORTANT><IMPORTANT><IMPORTANT><IMPORTANT><IMPORTANT><IMPORTANT><IMPORTANT>
-                    // klo km blm notice kita ada 3 kyk ginian di code nya, yang pertama funsinya untuk render map sebelum input
-                    // yang kedua untuk render map setelah press w dan player ke ata, yang ketiga untuk render map saat player nya ke bawah
-                    // klo kita cm ada satu tok, nanti player nya antara gk bisa gerak, atau code nya rusak
-                    // bisa seh pake satu tapi perlu pake function
-                    // THIS IS WHAT WE MUST GO THROUGH IF WE DON'T USE FUNTION BEN, LIFE COULD HAVE BEEN A LOT SIMPLER
-
-                    for (int h = 0; h < 2; h++) {
-                        system("cls");
-                        beware(active,buildingX);
-                        y++;
-                        scoring(score,mul);
-                        checkcol(seedb,active,x,y,buildingX,buildingY,menu1,twerk);
-                        if(menu1==5){
-                            gameover(hsname,hsscore,intscore,score);
-                            menu1=7;
-                            break;
-                        }
-                        building(seedb,buildingY,buildingX,active,y,x,twerk,maps);
-                        twnot(twerk);
-                        Sleep(100-5*mul);
-                    }
-                }
-                if (key == 'W' && twerk==0) { // renderin for making the player go up
-                    for (int h = 0; h < 3; h++) {
-                        system("cls");
-                        beware(active,buildingX);
-                        y--; //buat player lompat
-                        scoring(score,mul);
-                        checkcol(seedb,active,x,y,buildingX,buildingY,menu1,twerk);
-                        if(menu1==5){
-                            gameover(hsname,hsscore,intscore,score);
-                            menu1=7;
-                            break;
-                        }
-                        building(seedb,buildingY,buildingX,active,y,x,twerk,maps);
-                        twnot(twerk);
-                        Sleep(100-5*mul);
-                    }
-                    for (int h = 0; h < 3; h++) {
-                        system("cls");
-                        beware(active,buildingX);
-                        y++;
-                        scoring(score,mul);
-                        checkcol(seedb,active,x,y,buildingX,buildingY,menu1,twerk);
-                        if(menu1==5){
-                            gameover(hsname,hsscore,intscore,score);
-                            menu1=7;
-                            break;
-                        }
-                        building(seedb,buildingY,buildingX,active,y,x,twerk,maps);
-                        twnot(twerk);
-                        Sleep(100-5*mul);
-                    }
-                }
-                crouch(key,twerk);
-            }
+            cout << "0. Exit\n>>";
+            cin >> menuState;
+            continue;
         }
-        while(menu1==2){
-            system("cls");
-            for(int i=0;i<intscore.size();i++){
-                cout<<i+1<<". "<<hsname[i]<<" "<<intscore[i]<<endl;
+
+        if (menuState == 1) {
+            for (int i = 0; i < 3; i++) { bX[i] = -1; bY[i] = 6; active[i] = false; seedb[i] = 0; }
+            int x = 5, y = 6, score = 0, mul = 0, twerk = 0, spawnTimer = 0;
+
+            while (true) {
+                // Spawn logic
+                if (spawnTimer <= 0) {
+                    for (int i = 0; i < 3; i++) {
+                        if (!active[i]) {
+                            bX[i] = 49; seedb[i] = rand() % 7; active[i] = true;
+                            break;
+                        }
+                    }
+                    spawnTimer = rand() % 10 + 7;
+                }
+                spawnTimer--;
+
+                // Update frame (no jump)
+                if (updateFrame(y, 0, score, mul, x, twerk, seedb, active, bX, bY)) {
+                    gameover(highscores, score);
+                    break;
+                }
+
+                // Despawn off-screen obstacles
+                for (int i = 0; i < 3; i++) if (bX[i] < 0) active[i] = false;
+
+                // Input handling
+                if (kbhit()) {
+                    char key = getch();
+                    if (key == 's') twerk = (twerk == 0 ? 1 : 0);
+                    
+                    if ((key == 'w' || key == 'W') && twerk == 0) {
+                        int jumpHeight = (key == 'W') ? 3 : 2;
+                        bool died = false;
+                        
+                        // Going Up
+                        for (int h = 0; h < jumpHeight; h++) {
+                            if (updateFrame(y, -1, score, mul, x, twerk, seedb, active, bX, bY)) { died = true; break; }
+                        }
+                        // Going Down
+                        for (int h = 0; h < jumpHeight && !died; h++) {
+                            if (updateFrame(y, 1, score, mul, x, twerk, seedb, active, bX, bY)) died = true; 
+                        }
+                        if (died) { gameover(highscores, score); break; }
+                    }
+                }
             }
-            cout<<"0. Exit"<<endl;
-            do{
-                menu(menu2);
-            }while(menu2!=0);
-            if(menu2==0){
-                menu1=7;
-            }
-        }
-        if(menu1==0){
-            break;
         }
     }
     return 0;
